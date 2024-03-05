@@ -28,7 +28,7 @@ namespace BankAccount.Core.Tests.CheckingAccountTests
             _account = new CheckingAccount
             {
                 AccountNumber = AccountNumber,
-                CheckingBalance = InitialBalance,
+                Balance = InitialBalance,
                 IsOverDraftEnabled = true,
                 OverDraftLimit = 150
             };
@@ -43,7 +43,7 @@ namespace BankAccount.Core.Tests.CheckingAccountTests
             _overDraftEligibilityService.Setup(x => x.IsOverDraftEligible(_account)).Returns(true);
             _overDraftEligibilityService.Setup(x => x.IsDraftLimitExceeded(_account, It.IsAny<decimal>())).Returns(false);
             var result = _accountService.Deposit(AccountNumber, 100).Result;
-            Assert.Equal(200, result.CheckingBalance);
+            Assert.Equal(200, result.Balance);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace BankAccount.Core.Tests.CheckingAccountTests
             _overDraftEligibilityService.Setup(x => x.IsOverDraftEligible(_account)).Returns(true);
             _overDraftEligibilityService.Setup(x => x.IsDraftLimitExceeded(_account, It.IsAny<decimal>())).Returns(false);
             var result = _accountService.Withdraw(AccountNumber, 50).Result;
-            Assert.Equal(50, result.CheckingBalance);
+            Assert.Equal(50, result.Balance);
         }
 
         [Fact]

@@ -16,9 +16,9 @@ namespace BankAccount.Core.Services.HistorizationOperations
             await _operationHistoryRepository.AddOperation(operation);
             return operation;
         }
-        public async Task<List<Operation>> GetOperations(string accountNumber)
+        public async Task<IEnumerable<Operation>> GetOperations(int accountId, DateTime startDate, DateTime endDate)
         {
-            var operations = await _operationHistoryRepository.GetOperations(accountNumber);
+            var operations = await _operationHistoryRepository.GetOperations(accountId,startDate,endDate);
             return operations;
         }
     }

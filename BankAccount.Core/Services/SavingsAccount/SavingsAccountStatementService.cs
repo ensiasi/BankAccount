@@ -4,7 +4,7 @@ using BankAccount.Core.Ports.Driving;
 
 namespace BankAccount.Core.Services.SavingsAccounts
 {
-    public class SavingsAccountStatementService : IAccountStatementService
+    public class SavingsAccountStatementService : IAccountStatementService<SavingsAccount>
     {
         private IAccountRepository _accountRepository;
         private IOperationHistoryService _operationHistoryService;
@@ -15,11 +15,11 @@ namespace BankAccount.Core.Services.SavingsAccounts
             _operationHistoryService = operationHistoryService;
         }
 
-        public async Task<AccountStatement> GetAccountStatement(string accountNumber)
+        public async Task<AccountStatement> GetAccountStatement(SavingsAccount Svaccount, DateTime startDate, DateTime endDate)
         {
-            var account = await _accountRepository.GetSavingsAccount(accountNumber);
-            var operations = await _operationHistoryService.GetOperations(accountNumber);
-            var balance = account.SavingsBalance;
+            var account = await _accountRepository.GetSavingsAccount(Svaccount.AccountNumber);
+            var operations = await _operationHistoryService.GetOperations(Svaccount.AccountId,startDate,endDate);
+            var balance = account.Balance;
             return new AccountStatement
             {
                 Balance = balance,

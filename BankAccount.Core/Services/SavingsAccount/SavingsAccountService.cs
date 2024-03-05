@@ -23,27 +23,27 @@ namespace BankAccount.Core.Services.SavingsAccounts
         public async Task<SavingsAccount> Deposit(string accountNumber, decimal amount)
         {
             var account = await _accountRepository.GetSavingsAccount(accountNumber);
-            var newBalance = account.SavingsBalance + amount;
+            var newBalance = account.Balance + amount;
             if (newBalance > account.DepositCeiling)
             {
                 throw new DepositCeilingReachedException("Deposit ceiling reached");
             }
-            account.SavingsBalance = newBalance;
+            account.Balance = newBalance;
             await _accountRepository.UpdateSavingsAccount(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountNumber= account.AccountNumber,AccountType=AccountType.Savings,Amount=amount,OperationType=OperationType.Deposit,Date=DateTime.Now});
+            await _operationHistoryService.AddOperation(new Operation { AccountId= account.AccountId,AccountType=AccountType.Savings,Amount=amount,OperationType=OperationType.Deposit, OperationDate = DateTime.Now});
             return account;
         }
         public async Task<SavingsAccount> Withdraw(string accountNumber, decimal amount)
         {
             var account = await _accountRepository.GetSavingsAccount(accountNumber);
-            var newBalance = account.SavingsBalance - amount;
+            var newBalance = account.Balance - amount;
             if (newBalance < 0)
             {
                 throw new InsufficientFundsException("Insufficient balance for withdrawal");
             }
-            account.SavingsBalance = newBalance;
+            account.Balance = newBalance;
             await _accountRepository.UpdateSavingsAccount(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountNumber = account.AccountNumber, AccountType = AccountType.Savings, Amount = -amount, OperationType = OperationType.Withdrawal, Date = DateTime.Now });
+            await _operationHistoryService.AddOperation(new Operation { AccountId = account.AccountId, AccountType = AccountType.Savings, Amount = -amount, OperationType = OperationType.Withdrawal, OperationDate = DateTime.Now });
             return account;
         }
     }

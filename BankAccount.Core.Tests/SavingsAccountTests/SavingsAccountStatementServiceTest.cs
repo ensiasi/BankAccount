@@ -20,7 +20,7 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
             _account = new SavingsAccount
             {
                 AccountNumber = "1234567890",
-                SavingsBalance = 50,
+                Balance = 50,
                 DepositCeiling = 100
             };
             _operations = new List<Operation>
@@ -29,13 +29,13 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
                 {
                     Amount = 100,
                     OperationType = OperationType.Deposit,
-                    Date = DateTime.Now
+                    OperationDate = DateTime.Now
                 },
                 new Operation
                 {
                     Amount = 50,
                     OperationType = OperationType.Withdrawal,
-                    Date = DateTime.Now
+                    OperationDate = DateTime.Now
                 }
             };
             _accountStatement = new AccountStatement
@@ -46,17 +46,17 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
             _accountRepository = new Mock<IAccountRepository>();
             _accountRepository.Setup(x => x.GetSavingsAccount(It.IsAny<string>())).ReturnsAsync(_account);
             _operationHistoryService = new Mock<IOperationHistoryService>();
-            _operationHistoryService.Setup(x => x.GetOperations(It.IsAny<string>())).ReturnsAsync(_operations);
+            _operationHistoryService.Setup(x => x.GetOperations(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(_operations);
             _savingsAccountStatementService = new SavingsAccountStatementService(_accountRepository.Object, _operationHistoryService.Object);
         }
         [Fact]
         public async void GetAccountStatement_ShouldReturnAccountStatement()
         {
             // Act
-            var result = await _savingsAccountStatementService.GetAccountStatement("1234567890");
+            var result = await _savingsAccountStatementService.GetAccountStatement(_account,DateTime.Now,DateTime.Now);
             // Assert
             Assert.Equal(_accountStatement.Balance, result.Balance);
-            Assert.Equal(_accountStatement.Operations.Count, result.Operations.Count);
+            Assert.Equal(_accountStatement.Operations.ToList().Count, result.Operations.ToList().Count);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
             _account = new SavingsAccount
             {
                 AccountNumber = "123",
-                SavingsBalance = 100,
+                Balance = 100,
                 DepositCeiling = 1000
             };
             _accountRepository.Setup(x => x.GetSavingsAccount("123")).ReturnsAsync(_account);
@@ -35,7 +35,7 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
             //Act
             var result = await _savingsAccountService.Deposit("123", 100);
             //Assert
-            Assert.Equal(200, result.SavingsBalance);
+            Assert.Equal(200, result.Balance);
         }
         [Fact]
         public void Deposit_InvalidAmount_ShouldThrowException()
@@ -51,7 +51,7 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
             //Act
             var result = await _savingsAccountService.Withdraw("123", 50);
             //Assert
-            Assert.Equal(50, result.SavingsBalance);
+            Assert.Equal(50, result.Balance);
         }
         [Fact]
         public void Withdraw_InvalidAmount_ShouldThrowException()

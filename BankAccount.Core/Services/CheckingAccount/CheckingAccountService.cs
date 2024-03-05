@@ -21,15 +21,15 @@ namespace BankAccount.Core.Services.CheckingAccounts
         public async Task<CheckingAccount> Deposit(string accountNumber, decimal amount)
         {
             var account = await _accountRepository.GetCheckingAccount(accountNumber);
-            account.CheckingBalance += amount;
+            account.Balance += amount;
             await _accountRepository.UpdateCheckingAccountBalance(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountNumber= account.AccountNumber,AccountType= AccountType.Checking,Amount=amount,Date=DateTime.Now,OperationType=OperationType.Deposit});
+            await _operationHistoryService.AddOperation(new Operation { AccountId= account.AccountId,AccountType= AccountType.Checking,Amount=amount, OperationDate = DateTime.Now,OperationType=OperationType.Deposit});
             return account;
         }
         public async Task<CheckingAccount> Withdraw(string accountNumber, decimal amount)
         {
             var account = await _accountRepository.GetCheckingAccount(accountNumber);
-            var balanceAfterWithdraw = account.CheckingBalance - amount;
+            var balanceAfterWithdraw = account.Balance - amount;
 
             if (balanceAfterWithdraw < 0)
             {
@@ -42,9 +42,9 @@ namespace BankAccount.Core.Services.CheckingAccounts
                     throw new OverDraftLimitExceededException("Overdraft limit exceeded");
                 }
             }
-            account.CheckingBalance = balanceAfterWithdraw;
+            account.Balance = balanceAfterWithdraw;
             await _accountRepository.UpdateCheckingAccountBalance(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountNumber=account.AccountNumber,AccountType=AccountType.Checking,Amount= -amount,Date=DateTime.Now,OperationType=OperationType.Withdrawal});
+            await _operationHistoryService.AddOperation(new Operation { AccountId = account.AccountId,AccountType=AccountType.Checking,Amount= -amount, OperationDate = DateTime.Now,OperationType=OperationType.Withdrawal});
             return account;
         }
 
