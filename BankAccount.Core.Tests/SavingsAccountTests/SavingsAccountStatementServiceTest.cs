@@ -1,7 +1,6 @@
 ﻿using BankAccount.Core.Models;
-using BankAccount.Core.Ports.Driven;
 using BankAccount.Core.Ports.Driving;
-using BankAccount.Core.Services.SavingsAccounts;
+using BankAccount.Core.Services;
 using Moq;
 using Xunit;
 
@@ -9,8 +8,7 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
 {
     public class SavingsAccountStatementServiceTest
     {
-        private readonly SavingsAccountStatementService _savingsAccountStatementService;
-        private readonly Mock<IAccountRepository> _accountRepository;
+        private readonly IAccountStatementService _accountStatementService;
         private readonly Mock<IOperationHistoryService> _operationHistoryService;
         private readonly SavingsAccount _account;
         private readonly List<Operation> _operations;
@@ -43,17 +41,15 @@ namespace BankAccount.Core.Tests.SavingsAccountTests
                 Balance = 50,
                 Operations = _operations
             };
-            _accountRepository = new Mock<IAccountRepository>();
-            _accountRepository.Setup(x => x.GetSavingsAccount(It.IsAny<string>())).ReturnsAsync(_account);
             _operationHistoryService = new Mock<IOperationHistoryService>();
             _operationHistoryService.Setup(x => x.GetOperations(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>())).ReturnsAsync(_operations);
-            _savingsAccountStatementService = new SavingsAccountStatementService(_accountRepository.Object, _operationHistoryService.Object);
+            _accountStatementService = new AccountStatementService(_operationHistoryService.Object);
         }
         [Fact]
         public async void GetAccountStatement_ShouldReturnAccountStatement()
         {
             // Act
-            var result = await _savingsAccountStatementService.GetAccountStatement(_account,DateTime.Now,DateTime.Now);
+            var result = await _accountStatementService.GetAccountStatement(_account,DateTime.Now,DateTime.Now);
             // Assert
             Assert.Equal(_accountStatement.Balance, result.Balance);
             Assert.Equal(_accountStatement.Operations.ToList().Count, result.Operations.ToList().Count);

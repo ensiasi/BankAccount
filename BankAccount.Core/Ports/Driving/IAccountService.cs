@@ -5,7 +5,7 @@ namespace BankAccount.Core.Ports.Driving
 {
     internal interface IAccountService <T>
     {
-        Task<T> Deposit(string accountNumber, decimal amount);
-        Task<T> Withdraw(string accountNumber, decimal amount);
+        Task<T> Deposit(T account, decimal amount);
+        Task<T> Withdraw(T account, decimal amount);
     }
 }

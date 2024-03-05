@@ -2,11 +2,9 @@
 
 namespace BankAccount.Core.Ports.Driven
 {
-    public interface IAccountRepository
+    public interface IAccountRepository<T> where T : Account
     {
-        Task<CheckingAccount> GetCheckingAccount(string accountNumber);
-        Task<SavingsAccount> GetSavingsAccount(string accountNumber);
-        Task<CheckingAccount> UpdateCheckingAccountBalance(CheckingAccount account);
-        Task<SavingsAccount> UpdateSavingsAccount(SavingsAccount account);
+        Task Save(T account);
+        Task<T> GetById(int id);
     }
 }

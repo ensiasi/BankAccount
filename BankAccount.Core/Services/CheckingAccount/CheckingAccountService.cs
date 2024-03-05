@@ -1,5 +1,4 @@
-﻿using BankAccount.Core.Exceptions;
-using BankAccount.Core.Models;
+﻿using BankAccount.Core.Models;
 using BankAccount.Core.Ports.Driven;
 using BankAccount.Core.Ports.Driving;
 
@@ -7,10 +6,10 @@ namespace BankAccount.Core.Services.CheckingAccounts
 {
     public class CheckingAccountService : IAccountService<CheckingAccount>
     {
-        private readonly IAccountRepository _accountRepository;
+        private readonly IAccountRepository<CheckingAccount> _accountRepository;
         private readonly IOperationHistoryService _operationHistoryService;
         private readonly IOverDraftEligibilityService _overDraftEligibilityService;
-        public CheckingAccountService(IAccountRepository accountRepository,
+        public CheckingAccountService(IAccountRepository<CheckingAccount> accountRepository,
                               IOverDraftEligibilityService overDraftEligibilityService,
                               IOperationHistoryService operationHistoryService)
         {
@@ -18,35 +17,35 @@ namespace BankAccount.Core.Services.CheckingAccounts
             _overDraftEligibilityService = overDraftEligibilityService;
             _operationHistoryService = operationHistoryService;
         }
-        public async Task<CheckingAccount> Deposit(string accountNumber, decimal amount)
+        public async Task<CheckingAccount> Deposit(CheckingAccount account, decimal amount)
         {
-            var account = await _accountRepository.GetCheckingAccount(accountNumber);
             account.Balance += amount;
-            await _accountRepository.UpdateCheckingAccountBalance(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountId= account.AccountId,AccountType= AccountType.Checking,Amount=amount, OperationDate = DateTime.Now,OperationType=OperationType.Deposit});
-            return account;
-        }
-        public async Task<CheckingAccount> Withdraw(string accountNumber, decimal amount)
-        {
-            var account = await _accountRepository.GetCheckingAccount(accountNumber);
-            var balanceAfterWithdraw = account.Balance - amount;
-
-            if (balanceAfterWithdraw < 0)
+            await _accountRepository.Save(account);
+            //record transaction
+            await _operationHistoryService.AddOperation(new Operation
             {
-                if (!_overDraftEligibilityService.IsOverDraftEligible(account))
-                {
-                    throw new InsufficientFundsException("Insufficient balance for withdrawal");
-                }
-                else if (_overDraftEligibilityService.IsDraftLimitExceeded(account, balanceAfterWithdraw))
-                {
-                    throw new OverDraftLimitExceededException("Overdraft limit exceeded");
-                }
-            }
-            account.Balance = balanceAfterWithdraw;
-            await _accountRepository.UpdateCheckingAccountBalance(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountId = account.AccountId,AccountType=AccountType.Checking,Amount= -amount, OperationDate = DateTime.Now,OperationType=OperationType.Withdrawal});
+                AccountId = account.AccountId,
+                Amount = amount,
+                OperationDate = DateTime.Now,
+                OperationType = OperationType.Deposit
+            });
             return account;
         }
+        public async Task<CheckingAccount> Withdraw(CheckingAccount account, decimal amount)
+        {
+            _overDraftEligibilityService.CheckOverDraft(account, amount);
+            account.Balance -= amount;
+            await _accountRepository.Save(account);
+            await _operationHistoryService.AddOperation(new Operation
+            {
+                AccountId = account.AccountId,
+                Amount = -amount,
+                OperationDate = DateTime.Now,
+                OperationType = OperationType.Withdrawal
+            });
+            return account;
+        }
+
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using BankAccount.Core.Models;
+﻿using BankAccount.Core.Exceptions;
+using BankAccount.Core.Models;
 using BankAccount.Core.Ports.Driving;
 using BankAccount.Core.Services.CheckingAccounts;
 using Xunit;
@@ -14,20 +15,7 @@ namespace BankAccount.Core.Tests.CheckingAccountTests
 
         }
         [Fact]
-        public void IsOverDraftEligible_WhenAccountIsOverDraftEnabled_ReturnsTrue()
-        {
-            //Arrange
-            var account = new CheckingAccount
-            {
-                IsOverDraftEnabled = true
-            };
-            //Act
-            var result = _overDraftEligibilityService.IsOverDraftEligible(account);
-            //Assert
-            Assert.True(result);
-        }
-        [Fact]
-        public void IsOverDraftEligible_WhenAccountIsOverDraftDisabled_ReturnsFalse()
+        public void IsOverDraftEligible_WhenAccountIsNotOverDraftEnabled_Throw_InsufficientFundsException()
         {
             //Arrange
             var account = new CheckingAccount
@@ -35,51 +23,25 @@ namespace BankAccount.Core.Tests.CheckingAccountTests
                 IsOverDraftEnabled = false
             };
             //Act
-            var result = _overDraftEligibilityService.IsOverDraftEligible(account);
+            var exception = Assert.Throws<InsufficientFundsException>(() => _overDraftEligibilityService.CheckOverDraft(account, 100));
             //Assert
-            Assert.False(result);
+            Assert.Equal("Insufficient balance for withdrawal", exception.Message);
         }
         [Fact]
-        public void IsDraftLimitExceeded_WhenAccountIsNotOverDraftEnabled_ReturnsFalse()
-        {
-            //Arrange
-            var account = new CheckingAccount
-            {
-                IsOverDraftEnabled = false
-            };
-            //Act
-            var result = _overDraftEligibilityService.IsDraftLimitExceeded(account, 0);
-            //Assert
-            Assert.False(result);
-        }
-        [Fact]
-        public void IsDraftLimitExceeded_WhenBalanceAfterWithdrawIsGreaterThanOverDraftLimit_ReturnsFalse()
+        public void IsOverDraftEligible_WhenAccountOverDraftLimitIsReached_Throw_OverDraftLimitExceededException()
         {
             //Arrange
             var account = new CheckingAccount
             {
                 IsOverDraftEnabled = true,
-                OverDraftLimit = 100
+                OverDraftLimit = 100,
+                Balance=0
+                
             };
             //Act
-            var result = _overDraftEligibilityService.IsDraftLimitExceeded(account, -200);
+            var exception = Assert.Throws<OverDraftLimitExceededException>(() => _overDraftEligibilityService.CheckOverDraft(account, 150));
             //Assert
-            Assert.False(result);
+            Assert.Equal("Overdraft limit exceeded", exception.Message);
         }
-        [Fact]
-        public void IsDraftLimitExceeded_WhenBalanceAfterWithdrawIsLessThanOverDraftLimit_ReturnsTrue()
-        {
-            //Arrange
-            var account = new CheckingAccount
-            {
-                IsOverDraftEnabled = true,
-                OverDraftLimit = 100
-            };
-            //Act
-            var result = _overDraftEligibilityService.IsDraftLimitExceeded(account, -50);
-            //Assert
-            Assert.True(result);
-        }
-
     }
 }

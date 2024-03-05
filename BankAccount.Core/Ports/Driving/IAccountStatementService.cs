@@ -1,8 +1,8 @@
 ﻿using BankAccount.Core.Models;
 namespace BankAccount.Core.Ports.Driving
 {
-    public interface IAccountStatementService<T> where T : Account
+    public interface IAccountStatementService
     {
-        Task<AccountStatement> GetAccountStatement(T account, DateTime startdate,DateTime endDate);
+        Task<AccountStatement> GetAccountStatement(Account account, DateTime startdate,DateTime endDate);
     }
 }

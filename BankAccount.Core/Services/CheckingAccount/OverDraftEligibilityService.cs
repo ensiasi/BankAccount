@@ -1,29 +1,25 @@
-﻿using BankAccount.Core.Models;
+﻿using BankAccount.Core.Exceptions;
+using BankAccount.Core.Models;
 using BankAccount.Core.Ports.Driving;
 
 namespace BankAccount.Core.Services.CheckingAccounts
 {
     public class OverDraftEligibilityService : IOverDraftEligibilityService
     {
-        public bool IsDraftLimitExceeded(CheckingAccount account, decimal balanceAfterWithDraw)
+        public void CheckOverDraft(CheckingAccount account, decimal amount)
         {
-            if (account.IsOverDraftEnabled)
+            var newBalance = account.Balance - amount;
+            if (newBalance < 0)
             {
-                if (Math.Abs(balanceAfterWithDraw) > account.OverDraftLimit)
+                if ((!account.IsOverDraftEnabled))
                 {
-                    return false;
+                    throw new InsufficientFundsException("Insufficient balance for withdrawal");
                 }
-                return true;
+                else if (Math.Abs(newBalance) > account.OverDraftLimit)
+                {
+                    throw new OverDraftLimitExceededException("Overdraft limit exceeded");
+                }
             }
-            return false;
-        }
-        public bool IsOverDraftEligible(CheckingAccount account)
-        {
-            if (account.IsOverDraftEnabled)
-            {
-                return true;
-            }
-            return false;
         }
     }
 }

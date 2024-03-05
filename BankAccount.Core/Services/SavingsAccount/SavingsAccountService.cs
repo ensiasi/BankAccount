@@ -11,40 +11,50 @@ namespace BankAccount.Core.Services.SavingsAccounts
 {
     public class SavingsAccountService : IAccountService<SavingsAccount>
     {
-        private IAccountRepository _accountRepository;
+        private IAccountRepository<SavingsAccount> _accountRepository;
         private IOperationHistoryService _operationHistoryService;
 
-        public SavingsAccountService(IAccountRepository accountRepository, IOperationHistoryService operationHistoryService)
+        public SavingsAccountService(IAccountRepository<SavingsAccount> accountRepository, IOperationHistoryService operationHistoryService)
         {
             _accountRepository = accountRepository;
             _operationHistoryService = operationHistoryService;
         }
 
-        public async Task<SavingsAccount> Deposit(string accountNumber, decimal amount)
+        public async Task<SavingsAccount> Deposit(SavingsAccount account, decimal amount)
         {
-            var account = await _accountRepository.GetSavingsAccount(accountNumber);
-            var newBalance = account.Balance + amount;
-            if (newBalance > account.DepositCeiling)
+            if (account.Balance + amount > account.DepositCeiling)
             {
-                throw new DepositCeilingReachedException("Deposit ceiling reached");
+                throw new DepositCeilingReachedException("Deposit amount exceeds the limit.");
             }
-            account.Balance = newBalance;
-            await _accountRepository.UpdateSavingsAccount(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountId= account.AccountId,AccountType=AccountType.Savings,Amount=amount,OperationType=OperationType.Deposit, OperationDate = DateTime.Now});
+            account.Balance += amount;
+            await _accountRepository.Save(account);
+            await _operationHistoryService.AddOperation(new Operation
+            {
+                AccountId = account.AccountId,
+                Amount = amount,
+                OperationDate = DateTime.Now,
+                OperationType = OperationType.Deposit
+            });
             return account;
         }
-        public async Task<SavingsAccount> Withdraw(string accountNumber, decimal amount)
+
+        public async Task<SavingsAccount> Withdraw(SavingsAccount account, decimal amount)
         {
-            var account = await _accountRepository.GetSavingsAccount(accountNumber);
-            var newBalance = account.Balance - amount;
-            if (newBalance < 0)
+            if (amount > account.Balance)
             {
-                throw new InsufficientFundsException("Insufficient balance for withdrawal");
+                throw new InsufficientFundsException("Withdrawal amount exceeds the balance.");
             }
-            account.Balance = newBalance;
-            await _accountRepository.UpdateSavingsAccount(account);
-            await _operationHistoryService.AddOperation(new Operation { AccountId = account.AccountId, AccountType = AccountType.Savings, Amount = -amount, OperationType = OperationType.Withdrawal, OperationDate = DateTime.Now });
+            account.Balance -= amount;
+            await _accountRepository.Save(account);
+            await _operationHistoryService.AddOperation(new Operation
+            {
+                AccountId = account.AccountId,
+                Amount = -amount,
+                OperationDate = DateTime.Now,
+                OperationType = OperationType.Withdrawal
+            });
             return account;
         }
+
     }
 }
