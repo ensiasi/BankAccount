@@ -1,0 +1,19 @@
+{
+  "stryker-config": {
+    "reporters": [
+      "html",
+      "progress",
+      "dashboard"
+    ],
+    "project": "BankAccount.Core/BankAccount.Core.csproj",
+    "solution": "BankAccount.sln",
+    "test-projects": [
+      "BankAccount.Core.Tests/BankAccount.Core.Tests.csproj"
+    ],
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 50
+    }
+  }
+}
