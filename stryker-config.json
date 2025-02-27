@@ -2,8 +2,7 @@
   "stryker-config": {
     "reporters": [
       "html",
-      "progress",
-      "dashboard"
+      "progress"
     ],
     "project": "BankAccount.Core/BankAccount.Core.csproj",
     "solution": "BankAccount.sln",
