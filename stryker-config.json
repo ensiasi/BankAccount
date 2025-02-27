@@ -2,8 +2,14 @@
   "stryker-config": {
     "reporters": [
       "html",
-      "progress"
+      "progress",
+      "dashboard"
     ],
+    "project-info": {
+      "name": "https://github.com/ensiasi/BankAccount",
+      "version": "main"
+    },
+    "dashboard-api-key": "5ad90c4d-80e7-4406-915c-75eb6ba5ede5",
     "project": "BankAccount.Core/BankAccount.Core.csproj",
     "solution": "BankAccount.sln",
     "test-projects": [
