@@ -6,8 +6,7 @@
       "dashboard"
     ],
     "project-info": {
-      "name": "github.com/ensiasi/BankAccount",
-      "version": "main"
+      "name": "github.com/ensiasi/BankAccount"
     },
     "dashboard-url": "https://dashboard.stryker-mutator.io/api/reports",
     "project": "BankAccount.Core/BankAccount.Core.csproj",
